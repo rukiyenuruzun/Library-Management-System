@@ -1,0 +1,7 @@
+101;Pride and Prejudice;Jane Austen;Available
+102;Data Structures;Robert Lafore;Available
+103;Clean Code;Robert C. Martin;Borrowed
+104;Harry Potter;J.K. Rowling;Borrowed
+105;the widow;john grisham;Borrowed
+106;alchemised;SenLinYu;Available
+107;Jane Eyre;Charlotte Bronte;Available
