@@ -1,17 +1,17 @@
 /**
  * Library Class
  * Manages the entire system by integrating DynamicArray, BST, Queue, and Stack.
- * Handles File I/O for persistence via helper class [Source: 67, 86].
+ * [cite_start]Handles File I/O for persistence via helper class[cite: 67, 86].
  */
 public class Library {
 
     // --- Data Structures ---
-    private DynamicArray catalog;   // Kitapları tutan ana liste (Array) [Source: 10]
-    private BST bookTree;           // İsimle arama yapmak için ağaç (BST) [Source: 21]
-    private Queue borrowRequests;   // Bekleme sırası (Queue) [Source: 28]
-    private Stack undoStack;        // Geri alma işlemi için yığın (Stack) [Source: 36]
+    private DynamicArray catalog;   // Main list to store books (Array) [cite: 10]
+    private BST bookTree;           // BST for title-based searching [cite: 21]
+    private Queue borrowRequests;   // Queue for managing waiting list [cite: 28]
+    private Stack undoStack;        // Stack for undoing operations [cite: 36]
 
-    private int lastBookID = 100;   // ID sayacı (100'den başlattık)
+    private int lastBookID = 100;   // Counter for auto-generating IDs
 
     /**
      * Constructor
@@ -23,10 +23,10 @@ public class Library {
         borrowRequests = new Queue();
         undoStack = new Stack();
 
-        // 1. Dosyadan kayıtlı kitapları yükle
+        // 1. Load existing books from the file
         FileIO.loadBooks(catalog, bookTree);
         
-        // 2. ID çakışmasını önlemek için son ID'yi güncelle
+        // 2. Update the ID counter to prevent duplicates
         updateLastID(); 
     }
 
@@ -48,14 +48,14 @@ public class Library {
      * Time Complexity: O(n) due to array resize possibility
      */
     public void addBook(String title, String author) {
-        lastBookID++; // ID'yi artır
-        // KURAL: Yeni eklenen kitap her zaman "Available" olur.
+        lastBookID++; // Increment ID
+        // RULE: New books are always initialized as "Available"
         Book newBook = new Book(lastBookID, title, author, "Available");
 
-        catalog.add(newBook);       // Array'e ekle [Source: 17]
-        bookTree.insert(newBook);   // BST'ye ekle [Source: 24]
+        catalog.add(newBook);       // Add to Dynamic Array 
+        bookTree.insert(newBook);   // Insert into BST 
         
-        // Değişikliği dosyaya kaydet
+        // Save changes to the file
         FileIO.saveBooks(catalog);
 
         System.out.println("Book added successfully: " + title + " (ID: " + lastBookID + ")");
@@ -69,13 +69,13 @@ public class Library {
         for (int i = 0; i < catalog.size(); i++) {
             Book b = catalog.get(i);
             if (b.getBookID() == id) {
-                catalog.remove(i); // [Source: 15]
+                catalog.remove(i); 
                 
-                // Silme işlemini dosyaya yansıt
+                // Update the file to reflect removal
                 FileIO.saveBooks(catalog);
                 
-                // Not: BST'den silme işlemi karmaşık olduğu için 
-                // bu proje kapsamında genelde istenmez ama listeden silindi.
+                // Note: Deletion from BST is complex and omitted for this project scope.
+                // The book is effectively removed from the main catalog.
                 System.out.println("Book removed successfully.");
                 return;
             }
@@ -103,7 +103,7 @@ public class Library {
      * Time Complexity: O(log n) average
      */
     public void searchByTitle(String title) {
-        Book b = bookTree.search(title); // [Source: 25]
+        Book b = bookTree.search(title);
         if (b != null) {
             System.out.println("Found in BST: " + b);
         } else {
@@ -130,7 +130,7 @@ public class Library {
      */
     public void listAllBooksAlphabetical() {
         System.out.println("\n--- All Books (Alphabetical Order) ---");
-        bookTree.inOrderTraversal(); // [Source: 46]
+        bookTree.inOrderTraversal(); 
     }
 
     /**
@@ -138,10 +138,10 @@ public class Library {
      * Time Complexity: O(1)
      */
     public void requestBook(String userName, int bookID) {
-        // İsteği kuyruğa ekle
-        borrowRequests.enqueue(userName, bookID); // [Source: 30]
+        // Enqueue the request
+        borrowRequests.enqueue(userName, bookID); 
         
-        // Kullanıcıyı veritabanına ekle (Log amaçlı)
+        // Log the user request to the database/file
         FileIO.appendUser(userName + ";Requested Book ID: " + bookID);
         
         System.out.println("Request added to waiting list for user: " + userName);
@@ -152,13 +152,12 @@ public class Library {
      * Time Complexity: O(1)
      */
     public void processQueue() {
-        // Queue sınıfının içinde Request diye bir obje/inner class döndürdüğünü varsayıyoruz
-        // Eğer Queue string döndürüyorsa burayı ona göre güncellemelisin.
-        Object req = borrowRequests.dequeue(); // [Source: 33]
+        // Retrieve the next request object from the queue
+        Object req = borrowRequests.dequeue(); 
         
         if (req != null) {
             System.out.println("Processing request: " + req.toString());
-            // Buraya otomatik borrowBook çağırma mantığı eklenebilir.
+            // Logic to automatically borrow the book can be implemented here.
         } else {
             System.out.println("No waiting requests.");
         }
@@ -175,10 +174,10 @@ public class Library {
                 if (b.getStatus().equalsIgnoreCase("Available")) {
                     b.setStatus("Borrowed");
                     
-                    // İşlemi Stack'e at (Undo için)
-                    undoStack.push("BORROW", id); // [Source: 40]
+                    // Push action to Stack for Undo capability
+                    undoStack.push("BORROW", id);
                     
-                    // Dosyayı güncelle
+                    // Save updates to file
                     FileIO.saveBooks(catalog);
                     
                     System.out.println("You borrowed: " + b.getTitle());
@@ -201,10 +200,10 @@ public class Library {
             if (b.getBookID() == id) {
                 b.setStatus("Available");
                 
-                // İşlemi Stack'e at (Undo için)
-                undoStack.push("RETURN", id); // [Source: 40]
+                // Push action to Stack for Undo capability
+                undoStack.push("RETURN", id); 
                 
-                // Dosyayı güncelle
+                // Save updates to file
                 FileIO.saveBooks(catalog);
                 
                 System.out.println("Book returned: " + b.getTitle());
@@ -219,26 +218,26 @@ public class Library {
      * Time Complexity: O(n) to find book and revert
      */
     public void undo() {
-        // Stack sınıfının Action diye bir obje döndürdüğünü varsayıyoruz.
-        // Eğer Stack string döndürüyorsa parse etmen gerekir.
-        Stack.Action lastAction = undoStack.pop(); // [Source: 41]
+        // Pop the last action object from the stack
+        Stack.Action lastAction = undoStack.pop(); 
         
         if (lastAction == null) {
             System.out.println("Nothing to undo.");
             return;
         }
 
-        // TERS MANTIK: Eğer son işlem "BORROW" ise geri alınca "Available" olur.
-        // Eğer son işlem "RETURN" ise geri alınca "Borrowed" olur.
+        // REVERSE LOGIC: 
+        // If last action was "BORROW", revert status to "Available".
+        // If last action was "RETURN", revert status to "Borrowed".
         String newStatus = (lastAction.type.equals("BORROW")) ? "Available" : "Borrowed";
         
-        // Kitabı bul ve durumunu güncelle
+        // Find the book and update its status
         for (int i = 0; i < catalog.size(); i++) {
             Book b = catalog.get(i);
             if (b.getBookID() == lastAction.bookID) {
                 b.setStatus(newStatus);
                 
-                // Dosyayı güncelle
+                // Save updates to file
                 FileIO.saveBooks(catalog);
                 
                 System.out.println("Undo successful. Book ID " + lastAction.bookID + " is now " + newStatus);
