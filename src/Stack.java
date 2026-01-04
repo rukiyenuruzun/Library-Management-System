@@ -1,34 +1,33 @@
-/**
+/*
  * Stack Class
- * Manages actions in a Last-In-First-Out (LIFO) manner using a Linked List approach.
- * Specifically designed for the Undo feature in the Library System [Source: 36, 37].
+ * manages actions in a LastInFirstOut (LIFO) manner using a linkedlist.
+ * stores the history of borrow / rreturn operations for the Undo feature.
+ * project : 4. Borrow and Return Books + Undo feature
  */
+
 public class Stack {
 
-    /**
-     * Represents a single action (Borrow or Return) stored in the history.
-     * Accessible publicly so Library.java can read the action type and book ID.
-     */
+    
+     //represents a single action (borrow or return) stored in the stack.
+     //made static and public so Library.java can access fields like .type and .bookID
+     
     public static class Action {
-        public String type; // "BORROW" or "RETURN"
-        public int bookID;
+        public String type; // barroww or return 
+        public int bookID;  //the ID of the book involved
 
         public Action(String type, int bookID) {
             this.type = type;
             this.bookID = bookID;
         }
-        
+
         @Override
         public String toString() {
-            return type + " operation on Book ID: " + bookID;
+            return "Action: " + type + " on Book ID: " + bookID;
         }
     }
-
-    /**
-     * Node class for the linked list structure.
-     * Private because outside classes don't need to know about the nodes, just the Actions.
-     */
-    private static class Node {
+ 
+     // node class for linkedlist implementation.
+    private class Node {
         Action data;
         Node next;
 
@@ -38,67 +37,57 @@ public class Stack {
         }
     }
 
-    private Node top; // Yığının en tepesi (Head of the list)
+    private Node top; //top data of the stack 
 
-    /**
-     * Constructor
-     * Initializes an empty stack.
-     * Time Complexity: O(1)
-     */
     public Stack() {
         this.top = null;
     }
 
     /**
-     * Pushes a new action onto the stack.
-     * Adds the new node to the beginning of the list (Top).
-     * Time Complexity: O(1)
-     * @param type The type of action ("BORROW" or "RETURN")
-     * @param bookID The ID of the book involved [Source: 40]
+     * pushes a new action onto the top of the stack.
+    time complexity bigO: O(1) Inserting at the head of a linked list is constant
+    type  type of action (barrow or return)
+    bookID The ID of the book involved
      */
     public void push(String type, int bookID) {
-        Action action = new Action(type, bookID);
-        Node newNode = new Node(action);
+        Action newAction = new Action(type, bookID);
+        Node newNode = new Node(newAction);
+
+        newNode.next = top;//link the new node to the current top
+        top = newNode;//update top to be the new node
         
-        if (top == null) {
-            top = newNode;
-        } else {
-            newNode.next = top; // Yeni geleni eskilerin tepesine koy
-            top = newNode;      // Top artık yeni gelen düğüm
-        }
     }
 
     /**
-     * Pops the last action from the stack.
-     * Removes the node from the top of the list.
-     * Used by the undo feature to revert changes.
-     * Time Complexity: O(1)
-     * @return The last Action object or null if stack is empty [Source: 41]
+     * removes and returns the last action added to the stack.
+     time Complexity: O(1)removing from the head is constant
+     * the last action object or null if stack is empty
      */
     public Action pop() {
-        if (top == null) {
-            return null; // Stack boşsa null dön
+        if (isEmpty()) {
+            return null;
         }
         
-        Action poppedAction = top.data; // Veriyi al
-        top = top.next;                 // Top'ı bir aşağı kaydır
-        return poppedAction;            // Veriyi geri döndür
+        Action poppedAction = top.data;//get data
+        
+        top = top.next; //shift top to next node
+        
+        return poppedAction;
     }
-
-    /**
-     * Checks if the stack is empty.
-     * Time Complexity: O(1)
-     */
+      //time Complexity: O(1)
     public boolean isEmpty() {
         return top == null;
     }
     
-    /**
-     * Peeks at the top action without removing it.
-     * (Optional helper method)
-     */
-    public Action peek() {
-        if (top == null) return null;
-        return top.data;
+    // returns the number of elements instack
+    //time complxity: O(n) traversal required
+    public int size() {
+        int count = 0;
+        Node current = top;
+        while (current != null) {
+            count++;
+            current = current.next;
+        }
+        return count;
     }
 }
